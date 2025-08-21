@@ -3,11 +3,11 @@ on:
   push:
     branches:
       - main
-      - ft/chatbot-codebase
+      # - ft/chatbot-codebase
   pull_request:
     branches:
       - main
-      - ft/chatbot-codebase
+      # - ft/chatbot-codebase
 
 jobs:
   test:
