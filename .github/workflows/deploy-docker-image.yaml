@@ -75,7 +75,30 @@ jobs:
       #     rm -rf /tmp/.buildx-cache
       #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Check for changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            docker:
+              - 'apps/auth-service/**'
+              - 'Dockerfile'
+      - name: Restore docker build cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: buildx-${{ github.sha }}
+          restore-keys: |
+            buildx-
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: public.ecr.aws/t5i1x5v9/samanja-dev:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
         env:
           ECR_REGISTRY: public.ecr.aws
           ECR_REPOSITORY: samanja-dev
@@ -85,10 +108,6 @@ jobs:
           docker build -t samanja-dev .
           docker tag samanja-dev:latest public.ecr.aws/t5i1x5v9/samanja-dev:latest
           docker push public.ecr.aws/t5i1x5v9/samanja-dev:latest
-          with:
-            registry: public.ecr.aws
-            username: ${{ secrets.ACCESS_KEY_ID }}
-            password: ${{ secrets.SECRET_ACCESS_KEY }}
 
         # - uses: mr-smithers-excellent/docker-build-push@v6
         #   with:
