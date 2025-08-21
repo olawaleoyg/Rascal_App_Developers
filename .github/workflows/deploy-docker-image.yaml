@@ -53,43 +53,47 @@ jobs:
           TOKEN: ${{ secrets.MAPBOX_API_TOKEN }}
         run: sed "s/TOKEN_PLACEHOLDER/$TOKEN/g" ./app/.streamlit/config.template > ./app/.streamlit/config.toml
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@master
+      # - name: Set up Docker Buildx
+      #   id: buildx
+      #   uses: docker/setup-buildx-action@master
 
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
+      # - name: Cache Docker layers
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: /tmp/.buildx-cache
+      #     key: ${{ runner.os }}-buildx-${{ github.sha }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-buildx-
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./app
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: public.ecr.aws/t5i1x5v9/samanja-dev:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
+      # - name: Build Docker image
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: ./app
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     push: true
+      #     tags: public.ecr.aws/t5i1x5v9/samanja-dev:latest
+      #     cache-from: type=local,src=/tmp/.buildx-cache
+      #     cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      # - name: Build, tag, and push image to Amazon ECR
-      #   env:
-      #     ECR_REGISTRY: public.ecr.aws
-      #     ECR_REPOSITORY: samanja-dev
-      #     IMAGE_TAG: latest
+      # - name: Move cache
       #   run: |
-      #     docker build -t samanja-dev .
-      #     docker tag samanja-dev:latest public.ecr.aws/t5i1x5v9/samanja-dev:latest
-      #     docker push public.ecr.aws/t5i1x5v9/samanja-dev:latest
+      #     rm -rf /tmp/.buildx-cache
+      #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: public.ecr.aws
+          ECR_REPOSITORY: samanja-dev
+          IMAGE_TAG: latest
+        run: |
+          docker build -t samanja-dev .
+          docker tag samanja-dev:latest public.ecr.aws/t5i1x5v9/samanja-dev:latest
+          docker push public.ecr.aws/t5i1x5v9/samanja-dev:latest
+          with:
+            registry: public.ecr.aws
+            username: ${{ secrets.ACCESS_KEY_ID }}
+            password: ${{ secrets.SECRET_ACCESS_KEY }}
+            
         # - uses: mr-smithers-excellent/docker-build-push@v6
         #   with:
         #     image: olawaleoyg/chatbot
