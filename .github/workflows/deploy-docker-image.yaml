@@ -50,8 +50,8 @@ jobs:
           ECR_REPOSITORY: samanja-dev
           IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t samanja-dev .
+          docker push public.ecr.aws/t5i1x5v9/samanja-dev:latest
 
         # - uses: mr-smithers-excellent/docker-build-push@v6
         #   with:
