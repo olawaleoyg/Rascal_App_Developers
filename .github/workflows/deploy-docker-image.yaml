@@ -41,14 +41,14 @@ jobs:
       #     username: ${{ secrets.DOCKER_USERNAME }}
       #     password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Print debug info
-        run: |
-          # echo "REGISTRY=${{ secrets.REGISTRY }}"
-          echo "IMAGE_NAME=${{ vars.IMAGE_NAME }}"        
+      # - name: Print debug info
+      #   run: |
+      #     # echo "REGISTRY=${{ secrets.REGISTRY }}"
+      #     echo "IMAGE_NAME=${{ vars.IMAGE_NAME }}"        
         
       - uses: mr-smithers-excellent/docker-build-push@v6
         with:
-          image: olawaleoyg/chatbot:latest
+          image: olawaleoyg/chatbot
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
