@@ -41,28 +41,40 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
-          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
 
       - name: Login to Amazon ECR Private
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          # registry: public.ecr.aws
-          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Build, tag, and push docker image to Amazon ECR
+      - name: Get commit hash
+        id: get-commit-hash
+        run: echo "::set-output name=commit-hash::$(git rev-parse --short HEAD)"
+      - name: Get timestamp
+        id: get-timestamp
+        run: echo "::set-output name=timestamp::$(date +'%Y-%m-%d-%H-%M')"
+
+      - name: Build, tag, and push the image to Amazon ECR
+        id: build-image
         env:
-          REGISTRY: 211125759162.dkr.ecr.eu-west-1.amazonaws.com
-          REPOSITORY: samanja-dev
-          IMAGE_TAG: ${{ github.sha }}
+          ECR_REGISTRY: 211125759162.dkr.ecr.eu-west-1.amazonaws.com
+          ECR_REPOSITORY: samanja-dev
+          IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
         run: |
-          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 211125759162.dkr.ecr.eu-west-1.amazonaws.com
-          # docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          # docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          docker build -t samanja-dev .
-          docker tag samanja-dev:latest 211125759162.dkr.ecr.eu-west-1.amazonaws.com/samanja-dev:latest
-          docker push 211125759162.dkr.ecr.eu-west-1.amazonaws.com/samanja-dev:latest
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+      # - name: Build, tag, and push docker image to Amazon ECR
+      #   env:
+      #     REGISTRY: 211125759162.dkr.ecr.eu-west-1.amazonaws.com
+      #     REPOSITORY: samanja-dev
+      #     IMAGE_TAG: ${{ github.sha }}
+      #   run: |
+      #     aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 211125759162.dkr.ecr.eu-west-1.amazonaws.com
+      #     # docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+      #     # docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      #     docker build -t samanja-dev .
+      #     docker tag samanja-dev:latest 211125759162.dkr.ecr.eu-west-1.amazonaws.com/samanja-dev:latest
+      #     docker push 211125759162.dkr.ecr.eu-west-1.amazonaws.com/samanja-dev:latest
