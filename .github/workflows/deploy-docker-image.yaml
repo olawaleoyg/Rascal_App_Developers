@@ -81,9 +81,10 @@ jobs:
           ECR_REPOSITORY: samanja-dev
           IMAGE_TAG: latest
         run: |
-          docker build -t samanja-dev .
-          docker tag samanja-dev:latest public.ecr.aws/t5i1x5v9/samanja-dev:latest
-          docker push public.ecr.aws/t5i1x5v9/samanja-dev:latest
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/t5i1x5v9
+          # docker build -t samanja-dev .
+          # docker tag samanja-dev:latest public.ecr.aws/t5i1x5v9/samanja-dev:latest
+          # docker push public.ecr.aws/t5i1x5v9/samanja-dev:latest
           with:
             registry: public.ecr.aws
             username: ${{ secrets.ACCESS_KEY_ID }}
